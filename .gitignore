@@ -1,3 +1,7 @@
 .vscode*
 project*
 target*
+***.json
+*.class
+.metals*
+.bloop*

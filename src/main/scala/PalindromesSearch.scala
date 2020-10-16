@@ -1,8 +1,11 @@
+import PalindromesSearch._
 import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ArrayBuffer._
 import scala.collection.Seq
 import scala.collection.Seq._
+import scodec._
+import scodec.bits._
 
 import scala.math
 import java.io.File
@@ -25,9 +28,9 @@ import scala.io.Source
  */
 
 
-object PalindromesSearch {
+
   
-  class PalindromesSearch (private var n: Int, m: Int) {
+class PalindromesSearch (private var n: Int, m: Int) {
 
 
 
@@ -38,10 +41,29 @@ object PalindromesSearch {
     for (d <- 1 to n-1)                                 
       if (n % d==0)
         divise += (d)
-    divise.toSeq
-  }
+    (divise += n).toSeq
+    }
 
-  // def combinationPossibilities
+    //  returns the divisors/factors
+  def divisorsSequence2(n: Int) = (1 to n + 1).filter(n % _ == 0)
+
+
+
+
+    // returns the number of times a number a can be evenly divided by a number b
+  def ndiv(a: Int, b: Int) = {
+    var times = 0
+    var temp = a
+    while (temp % b == 0) {
+      times += 1
+      temp /= b
+      }
+    times
+    }
+
+    def divisorsMult(n: Int) = divisorsSequence2(n).map((f: Int) => { (f, ndiv(n, f)) })
+
+    def comb[N](p:Seq[N], n:Int) = (0 until p.size).combinations(n) map { _ map p }
 
 
   // def multi[Seq](as: Seq[Int], n: Int): Seq[Seq[Int]] = 
@@ -135,24 +157,26 @@ object PalindromesSearch {
   // }
 
 
-  def write(args: Array[String]) {
-    val writer = new PrintWriter(new File(OUTPUT_FILE_NAME))
+  // def write(args: Array[String]) {
+  //   val writer = new PrintWriter(new File(OUTPUT_FILE_NAME))
 
-    writer.write("Hello Developer, Welcome to Scala Programming.")
-    writer.close()
+  //   writer.write("Hello Developer, Welcome to Scala Programming.")
+  //   writer.close()
 
-    Source.fromFile("Write.txt").foreach { x => print(x) }
+  //   Source.fromFile("Write.txt").foreach { x => print(x) }
+  // }
+
+
+
+
+
+
+
+
   }
 
 
-
-
-
-
-
-
-} // end PalindromesSearch class
-
+object PalindromesSearch {
 
   val usage = 
           """
@@ -168,13 +192,17 @@ object PalindromesSearch {
   def main(args: Array[String]): Unit = {
 
     print("\n\nWelcome to the palindromic sequence project!\n\n")
-    if(args.length == 0)
-      sys.exit(1)
-
-    if (args.length == 2) 
+    if(args.length == 0){
+      println(usage)    
+      System.exit(1)
+    }
+    if (args.length == 1){
       println(usage)
-      
-    val n = args(0).toInt
+      System.exit(1)
+    }
+
+
+    val n =  args(0).toInt
     val m = args(1).toInt
     if (args.length == 3 && args(2) == "y")
       informed = true
@@ -183,18 +211,37 @@ object PalindromesSearch {
 
     val drome = new PalindromesSearch(n, m)
     var divisors =  drome.divisorsSequence(n).toSeq
-    var combi =  drome.sumCombination(divisors)
+    var div2 = drome.divisorsSequence2(n)
+    // var combi =  drome.sumCombination(divisors)
+    // var divMult = drome.divisorsMult(n)
 
-    print(divisors+ "\n")
+    print(drome.divisorsSequence(n).toSeq + "\n")
 
-    
+    // print(div2+ "\n"+ "\n")
+
+    // println(drome.divisorsMult(n))
+    println(drome.divisorsSequence2(n).toSeq)
+
+
+    // println("combinations")
+    // for (d <- 1 until n)
+    println(div2.combinations(1).toList)
+    div2.combinations(1) foreach println
+
+    println(drome.comb(div2, 3).toList)
+
+    drome.comb(div2, 1) foreach println
+    // println("permutations")
+    // div2.permutations foreach println
+
+    // val y: ByteVector = drome.divisorsSequence2(n)
 
 
     // divisors.multi(6).foreach(println _)
 
     
 
-    print(combi+ "\n")
+    // print(combi+ "\n")
 
     // combi.foreach(println _)
 
