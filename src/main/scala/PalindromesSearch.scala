@@ -2,8 +2,8 @@ import PalindromesSearch._
 import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ArrayBuffer._
-import scala.collection.Seq
-import scala.collection.Seq._
+import scala.collection.mutable.Seq
+import scala.collection.mutable.Seq._
 import scodec._
 import scodec.bits._
 
@@ -49,46 +49,80 @@ class PalindromesSearch (private var n: Int, m: Int) {
   def double(el: Int) = el * 2
 
     //  returns list of n's divisors
-  def divSeq(n: Int) = (1 to n + 1).filter(n % _ == 0)
+  def divSeq(n: Int): ArrayBuffer[Int]  = (1 to n + 1).filter(n % _ == 0).to[ArrayBuffer]
+
+  def removeFirstAndLast[A](xs: Iterable[A]) = xs.drop(1).dropRight(1)
 
 
-    // called with divsiros returns an array of tuples (divisor,multiple) = n
-  def divMult(n: Int) = divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
+  //   // called with divsiros returns an array of tuples (divisor,multiple) = n
+  // def divMult(n: Int) = divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
 
 
-  def divVary(n: Int) = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
+  // def divVary(n: Int) = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
+
+
+      // called with divsiros returns an array of tuples (divisor,multiple) = n
+  def divMult(n: Int): ArrayBuffer[(Int, Int)]= divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
+
+
+  def divVary(n: Int): ArrayBuffer[(Int, Int)] = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
+
+  
+
+
   
 
     // returns a list of lists of all the combinations of size n within sequence p
-  def comb[N](p:Seq[N], n:Int) = (0 until p.size).combinations(n) map { _ map p }
+  def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p })
 
 
     // returns a list of length a containing int b
-  def listIt(a: Int, b: Int) = List.fill(a)(b)
+  def listDiv(a: Int, b: Int): ArrayBuffer[Int]  =  ArrayBuffer.fill(a)(b)
+
+  def listDov(a: Int, b: Int, n: Int): ArrayBuffer[Int]  = ArrayBuffer.fill(ndiv(n,a))(b)
+
+
+  //   // returns a list of length a containing int b
+  // def listVary(a: Int, b: Int) = List.fill(a)(b)
+
+  // def add[(_: Int, _: Int)] = a + b
+
+
+
+
+
+  def divFactComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {divMult(n).map{case (param1, param2) => listDiv(param1,param2)}}
+
+  def divVaryComb[N](N: ArrayBuffer[(Int, Int)], n: Int, substitute: Int)  = (divVary(n)).map{case (param1, param2)  => (listDiv(param1, substitute) :+ (param2))}
+
+  // removeFirstAndLast
   
 
-  def divFactor[N](N: Seq[(Int, Int)], n: Int) = divMult(n).map{case (param1, param2) => listIt(param1,param2)}
+
+  // def divVaryComb[N](N: Seq[(Int, Int)], n: Int, z: Int) = divVary(n).map{case (param1, param2) => (listDiv(param1,z) :+ (param2))}
 
 
-    // returns the number of times a number b can be multiplied and remain less than a
-  def ndiv(a: Int, b: Int) = {
+  // def divVaryComb[N](N: Seq[(Int, Int)], n: Int) = divVary(n).map{case (param1, param2) => while ( i=0,i++; i  until ndiv(d, n - param1)) listDiv(param1,1) :+ (param2)}
+
+    // returns the number of times a number a can be multiplied and remain less than n
+  def ndiv(n: Int, a: Int) = {
     var times = 0
-    var temp = b
-    while (temp <= a) {
+    var temp = a
+    while (temp <= n) {
       times += 1
-      temp += b
+      temp += a
     }
     times
   }
 
-  def combo(n: Int, divisors:List[Int]) = {
-	  val combos = Array.fill(n + 1)(0)
+  def combo(n: Int, divisors: ArrayBuffer[Int] ): ArrayBuffer[Int]  = {
+	  val combos =  ArrayBuffer.fill(n + 1)(0)
 	  combos(0) = 1
 	  divisors.foreach (current =>
 	  for (i<-current to n)
 		  combos(i) =  combos(i) + combos(i - current)
 		  )
-	combos.toList
+	combos
   }   
 
 
@@ -139,8 +173,8 @@ object PalindromesSearch {
 
     print("Parameter n = " + n + "\nParameter m = " + m + "\n")
 
-    val drome = new PalindromesSearch(n, m)
-    var divisors =  drome.divSeq(n)
+    val drome  = new PalindromesSearch(n, m)
+    var divisors: ArrayBuffer[Int]   =   drome.divSeq(n)
     // var mult = drome.divMult(n)
 
     // println(drome.primeFactorsMult(336))
@@ -164,10 +198,9 @@ object PalindromesSearch {
     println(drome.divMult(n).unzip)
 
 
-    println("\n\ndivFactor func")
-    drome.divFactor(drome.divMult(n), n) foreach println
-
-
+    println("\n\ndivFactList func")
+    drome.divFactComb(drome.divMult(n), n) foreach println
+    println("end divFactList func end")
 
     // println("\n\ncomb func")
     // println(drome.comb(drome.divSeq(n), 1).toList)
@@ -178,10 +211,17 @@ object PalindromesSearch {
     println("\n\ndivisor Vary func")
     println(drome.divVary(n))
 
-        println(drome.listIt(1,26))
 
 
+    println("\n\ndivVaryList func")
+    drome.divVaryComb(drome.divMult(n), n, substitute = 1) foreach println
+    // println("end divVaryList func end")
+    drome.divVaryComb(drome.divMult(n),n, substitute = 2) foreach println
 
+
+    // println(drome.divFactComb(drome.divMult(n), n) :+ drome.divVaryComb(drome.divMult(n), n))
+
+    // drome.divMult(n).reduce(drome.divFactComb( drome.divMult(n), n))
 
     // println(drome.ndiv(n,m))
     
