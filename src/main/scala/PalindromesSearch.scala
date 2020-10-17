@@ -63,6 +63,13 @@ class PalindromesSearch (private var n: Int, m: Int) {
   def comb[N](p:Seq[N], n:Int) = (0 until p.size).combinations(n) map { _ map p }
 
 
+    // returns a list of length a containing int b
+  def listIt(a: Int, b: Int) = List.fill(a)(b)
+  
+
+  def divFactor[N](N: Seq[(Int, Int)], n: Int) = divMult(n).map{case (param1, param2) => listIt(param1,param2)}
+
+
     // returns the number of times a number b can be multiplied and remain less than a
   def ndiv(a: Int, b: Int) = {
     var times = 0
@@ -84,7 +91,6 @@ class PalindromesSearch (private var n: Int, m: Int) {
 	combos.toList
   }   
 
-  fillFunc
 
   // def write(args: Array[String]) {
   //   val writer = new PrintWriter(new File(OUTPUT_FILE_NAME))
@@ -154,6 +160,13 @@ object PalindromesSearch {
     println("\n\ndivisor Mult func")
     println(drome.divMult(n))
 
+    println("\n\ndivisor Mult func unzip")
+    println(drome.divMult(n).unzip)
+
+
+    println("\n\ndivFactor func")
+    drome.divFactor(drome.divMult(n), n) foreach println
+
 
 
     // println("\n\ncomb func")
@@ -165,7 +178,7 @@ object PalindromesSearch {
     println("\n\ndivisor Vary func")
     println(drome.divVary(n))
 
-    
+        println(drome.listIt(1,26))
 
 
 
