@@ -34,128 +34,57 @@ class PalindromesSearch (private var n: Int, m: Int) {
 
 
 
-  def divisorsSequence(n: Int): Seq[(Int)] = {
-    val divise = new ArrayBuffer[Int]
-    // var upperBound = math.sqrt(n+2).toInt
+  // def divisorsSequence(n: Int): Seq[(Int)] = {
+  //   val divise = new ArrayBuffer[Int]
+  //   // var upperBound = math.sqrt(n+2).toInt
 
-    for (d <- 1 to n-1)                                 
-      if (n % d==0)
-        divise += (d)
-    (divise += n).toSeq
-    }
+  //   for (d <- 1 to n-1)                                 
+  //     if (n % d==0)
+  //       divise += (d)
+  //   (divise += n).toSeq
+  //   }
 
-    //  returns the divisors/factors
-  def divisorsSequence2(n: Int) = (1 to n + 1).filter(n % _ == 0)
+  def sub(a: Int, b: Int) = a - b 
+
+  def double(el: Int) = el * 2
+
+    //  returns list of n's divisors
+  def divSeq(n: Int) = (1 to n + 1).filter(n % _ == 0)
 
 
+    // called with divsiros returns an array of tuples (divisor,multiple) = n
+  def divMult(n: Int) = divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
 
 
-    // returns the number of times a number a can be evenly divided by a number b
+  def divVary(n: Int) = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
+  
+
+    // returns a list of lists of all the combinations of size n within sequence p
+  def comb[N](p:Seq[N], n:Int) = (0 until p.size).combinations(n) map { _ map p }
+
+
+    // returns the number of times a number b can be multiplied and remain less than a
   def ndiv(a: Int, b: Int) = {
     var times = 0
-    var temp = a
-    while (temp % b == 0) {
+    var temp = b
+    while (temp <= a) {
       times += 1
-      temp /= b
-      }
+      temp += b
+    }
     times
-    }
+  }
 
-    def divisorsMult(n: Int) = divisorsSequence2(n).map((f: Int) => { (f, ndiv(n, f)) })
+  def combo(n: Int, divisors:List[Int]) = {
+	  val combos = Array.fill(n + 1)(0)
+	  combos(0) = 1
+	  divisors.foreach (current =>
+	  for (i<-current to n)
+		  combos(i) =  combos(i) + combos(i - current)
+		  )
+	combos.toList
+  }   
 
-    def comb[N](p:Seq[N], n:Int) = (0 until p.size).combinations(n) map { _ map p }
-
-
-  // def multi[Seq](as: Seq[Int], n: Int): Seq[Seq[Int]] = 
-  //   (Seq.fill(n)(as)).flatten.combinations(n).toList
-
-  // def factorCombinationsSummingTotal(fun: Int => Int, low: Int, high: Int): Seq[(Int, Int)] = {
-  //   val seq = new ArrayBuffer[(Int, Int)]
-  //   for (value <- low to high)
-  //     seq += ((value, fun(value)))
-  //   seq.toSeq
-  // }
-
-    // def factorCombinationsSummingTotal(seqFactor: Seq[(Int)]): Seq[Seq[(Int)]] = {
-    def sumCombination(divisors: Seq[(Int)]): Seq[Seq[(Int)]] = {
-      var comb = Seq[(Int)]()
-      var combs =  Seq[Seq[(Int)]]()
-
-      for( i <- 0 to (divisors.length - 1)){
-        combs +: oneCombo(divisors, i)
-      }
-      // combs += divisors.foreach(oneCombo(divisors, _))
-      
-
-      // for( i <- 1 to (incoming.length - 1)){
-      //   while (n !=  combs(i).reduceLeft(_ + _)){
-      //     combs(i) += incoming(i)
-      //     if (n == combs(i).reduceLeft(_ + _))
-            
-      //   }
-
-      // }
-      combs.toSeq
-    }
-
-    def oneCombo(divisors: Seq[(Int)], start: Int): Seq[(Int)] = {
-
-      var oneComboSum = new ArrayBuffer[(Int)]
-      oneComboSum += (divisors(start))
-
-      for( i <- 0 to (divisors.length - 1) by 1){
-        while (n >  oneComboSum.reduceLeft(_ + _)){
-            if (n == oneComboSum.reduceLeft(_ + _)){
-              return oneComboSum.toSeq
-            }
-          for (j <- (divisors.length - 1) to 0 by -1){
-            if (n > oneComboSum.reduceLeft(_ + _) + divisors(j) ){
-              oneComboSum += (divisors(j))
-              if (n == oneComboSum.reduceLeft(_ + _)){
-                return oneComboSum.toSeq
-            }
-            }
-          }
-          if (n > oneComboSum.reduceLeft(_ + _) + divisors(i) ){
-            oneComboSum += (divisors(i))
-            if (n == oneComboSum.reduceLeft(_ + _)){
-              return oneComboSum.toSeq
-            }
-          }
-        }
-      }
-      oneComboSum.toSeq
-
-
-    }
-
-      //     sequences += comb
-
-      // sequences
-
-
-
-
-      // while(seqFactor.hasNext)
-      //   comb += seqFactor(index)
-      //   number -= seqFactor(index)
-      //   while(number-factor >=0)
-      //     comb += seqFactor(index)
-      //      number -= seqFactor(index)
-      //   seqFactor.next()
-      //   index += 1
-      //   if (number == 0)
-      //     // sequences.add(comb.toSeq) 
-      //     print(comb.toSeq)
-
-      // sequences
-       
-        
-
-
-
-  // }
-
+  fillFunc
 
   // def write(args: Array[String]) {
   //   val writer = new PrintWriter(new File(OUTPUT_FILE_NAME))
@@ -165,11 +94,6 @@ class PalindromesSearch (private var n: Int, m: Int) {
 
   //   Source.fromFile("Write.txt").foreach { x => print(x) }
   // }
-
-
-
-
-
 
 
 
@@ -210,40 +134,59 @@ object PalindromesSearch {
     print("Parameter n = " + n + "\nParameter m = " + m + "\n")
 
     val drome = new PalindromesSearch(n, m)
-    var divisors =  drome.divisorsSequence(n).toSeq
-    var div2 = drome.divisorsSequence2(n)
-    // var combi =  drome.sumCombination(divisors)
-    // var divMult = drome.divisorsMult(n)
+    var divisors =  drome.divSeq(n)
+    // var mult = drome.divMult(n)
 
-    print(drome.divisorsSequence(n).toSeq + "\n")
-
-    // print(div2+ "\n"+ "\n")
-
-    // println(drome.divisorsMult(n))
-    println(drome.divisorsSequence2(n).toSeq)
-
-
-    // println("combinations")
-    // for (d <- 1 until n)
-    println(div2.combinations(1).toList)
-    div2.combinations(1) foreach println
-
-    println(drome.comb(div2, 3).toList)
-
-    drome.comb(div2, 1) foreach println
-    // println("permutations")
-    // div2.permutations foreach println
-
-    // val y: ByteVector = drome.divisorsSequence2(n)
-
-
-    // divisors.multi(6).foreach(println _)
+    // println(drome.primeFactorsMult(336))
 
     
 
-    // print(combi+ "\n")
+    // var combi =  drome.sumCombination(divisors)
+    // var divMult = drome.divisorsMult(n)
 
-    // combi.foreach(println _)
+    // print(drome.divisorsSequence(n).toSeq + "\n")
+
+    // print(div2+ "\n"+ "\n")
+
+    println("\n\ndivisor Seq func")
+    println(drome.divSeq(n))
+
+    println("\n\ndivisor Mult func")
+    println(drome.divMult(n))
+
+
+
+    // println("\n\ncomb func")
+    // println(drome.comb(drome.divSeq(n), 1).toList)
+
+    // drome.comb(drome.divSeq(n), 1) foreach println
+
+
+    println("\n\ndivisor Vary func")
+    println(drome.divVary(n))
+
+    
+
+
+
+
+    // println(drome.ndiv(n,m))
+    
+    
+    print( "\n"+ "\n")
+    // println(drome.combo(n,drome.divSeq(n).toList))
+    // drome.combo(n,drome.divSeq(n).toList) foreach println
+
+    // println("combinations")
+    // for (d <- 1 until n)
+    // println(div2.combinations(1).toList)
+    // div2.combinations(1) foreach println
+
+    // println(drome.comb(div2, 3).toList)
+
+    //  drome.comb(drome.divSeq(n), 3) foreach println
+    // println("permutations")
+    // div2.permutations foreach println
 
     
   } // end main method
