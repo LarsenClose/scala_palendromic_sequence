@@ -1,11 +1,13 @@
-import PalindromesSearch._
+import Palindromes._
 import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ArrayBuffer._
 import scala.collection.mutable.Seq
 import scala.collection.mutable.Seq._
+import scala.collection.parallel._
 import scodec._
 import scodec.bits._
+import scala.compat.Platform.currentTime
 
 import scala.math
 import java.io.File
@@ -13,6 +15,7 @@ import java.io.PrintWriter
 
 
 import scala.io.Source
+import scala.collection.parallel.mutable.ParArray
 
 /*
  * CS3210 - Principles of Programming Languages - Fall 2020
@@ -30,19 +33,25 @@ import scala.io.Source
 
 
   
-class PalindromesSearch (private var n: Int, m: Int) {
+class Palindromes (private var n: Int, m: Int) {
 
 
+    // returns a list of lists of all the combinations of size n within sequence p
+  def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p }).to[ParArray]
 
-  // def divisorsSequence(n: Int): Seq[(Int)] = {
-  //   val divise = new ArrayBuffer[Int]
-  //   // var upperBound = math.sqrt(n+2).toInt
 
-  //   for (d <- 1 to n-1)                                 
-  //     if (n % d==0)
-  //       divise += (d)
-  //   (divise += n).toSeq
-  //   }
+//   def validSequenceFilter(combinations: ParArray[ParArray[Int]])
+
+  // def runsAll(whole_range: ArrayBuffer[Int], n: Int) = whole_range.map((f: Int) => comb(whole_range, f))
+
+  // def powerset[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) { case (ss, el) => ss ++ ss.map(_ + el) }
+
+  // def combine(in: List[Char]): Seq[String] = 
+  //   for {
+  //       len <- 1 to in.length
+  //       combinations <- in combinations len
+  //   } yield combinations.mkString 
+
 
   def sub(a: Int, b: Int) = a - b 
 
@@ -65,21 +74,27 @@ class PalindromesSearch (private var n: Int, m: Int) {
   def divMult(n: Int): ArrayBuffer[(Int, Int)]= divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
 
 
-  def divVary(n: Int): ArrayBuffer[(Int, Int)] = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
+  def divVary(n: Int): ArrayBuffer[(Int, Int)] = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) => { (f, sub(n, f)) })
 
   
 
 
-  
 
     // returns a list of lists of all the combinations of size n within sequence p
-  def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p })
+  // def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p })
 
 
     // returns a list of length a containing int b
   def listDiv(a: Int, b: Int): ArrayBuffer[Int]  =  ArrayBuffer.fill(a)(b)
 
-  def listDov(a: Int, b: Int, n: Int): ArrayBuffer[Int]  = ArrayBuffer.fill(ndiv(n,a))(b)
+  // def listDov(n: Int, substitute: Int): ArrayBuffer[Int]  = {
+  //        ArrayBuffer.fill()(substitute)
+  
+
+  // }
+  
+  
+
 
 
   //   // returns a list of length a containing int b
@@ -93,7 +108,7 @@ class PalindromesSearch (private var n: Int, m: Int) {
 
   def divFactComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {divMult(n).map{case (param1, param2) => listDiv(param1,param2)}}
 
-  def divVaryComb[N](N: ArrayBuffer[(Int, Int)], n: Int, substitute: Int)  = (divVary(n)).map{case (param1, param2)  => (listDiv(param1, substitute) :+ (param2))}
+  def divVaryComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {(divVary(n).map{case (param1, param2)  => listDiv( param1, 1 ) :+ (param2)})}
 
   // removeFirstAndLast
   
@@ -140,7 +155,7 @@ class PalindromesSearch (private var n: Int, m: Int) {
   }
 
 
-object PalindromesSearch {
+object Palindromes {
 
   val usage = 
           """
@@ -173,8 +188,11 @@ object PalindromesSearch {
 
     print("Parameter n = " + n + "\nParameter m = " + m + "\n")
 
-    val drome  = new PalindromesSearch(n, m)
+    val drome  = new Palindromes(n, m)
     var divisors: ArrayBuffer[Int]   =   drome.divSeq(n)
+
+
+
     // var mult = drome.divMult(n)
 
     // println(drome.primeFactorsMult(336))
@@ -194,52 +212,27 @@ object PalindromesSearch {
     println("\n\ndivisor Mult func")
     println(drome.divMult(n))
 
-    println("\n\ndivisor Mult func unzip")
-    println(drome.divMult(n).unzip)
+    // println("\n\ndivisor Mult func unzip")
+    // println(drome.divMult(n).unzip)
+    println("\n\n Combinations")
+
+    var conbinations = drome.divFactComb(drome.divMult(n), n) :+ drome.divVaryComb(drome.divVary(n),n)
+    conbinations foreach println
 
 
-    println("\n\ndivFactList func")
-    drome.divFactComb(drome.divMult(n), n) foreach println
-    println("end divFactList func end")
+    // println("\n\ndivFactList func")
+    // drome.divFactComb(drome.divMult(n), n) foreach println
+    // println("end divFactList func end")
+    // print(drome.divFactComb(drome.divMult(n), n))
 
-    // println("\n\ncomb func")
-    // println(drome.comb(drome.divSeq(n), 1).toList)
+    // println("\n\ndivisor Vary func")
+    // println(drome.divVaryComb(drome.divVary(n),n))
 
-    // drome.comb(drome.divSeq(n), 1) foreach println
-
-
-    println("\n\ndivisor Vary func")
-    println(drome.divVary(n))
-
-
-
-    println("\n\ndivVaryList func")
-    drome.divVaryComb(drome.divMult(n), n, substitute = 1) foreach println
-    // println("end divVaryList func end")
-    drome.divVaryComb(drome.divMult(n),n, substitute = 2) foreach println
-
-
-    // println(drome.divFactComb(drome.divMult(n), n) :+ drome.divVaryComb(drome.divMult(n), n))
-
-    // drome.divMult(n).reduce(drome.divFactComb( drome.divMult(n), n))
-
-    // println(drome.ndiv(n,m))
-    
-    
-    print( "\n"+ "\n")
-    // println(drome.combo(n,drome.divSeq(n).toList))
-    // drome.combo(n,drome.divSeq(n).toList) foreach println
-
-    // println("combinations")
-    // for (d <- 1 until n)
-    // println(div2.combinations(1).toList)
-    // div2.combinations(1) foreach println
-
-    // println(drome.comb(div2, 3).toList)
-
-    //  drome.comb(drome.divSeq(n), 3) foreach println
-    // println("permutations")
-    // div2.permutations foreach println
+    // println(drome.powerset(Set(0 to n)))
+    var allofthem: ArrayBuffer[Int] = (0 to n).to[ArrayBuffer]
+    // println(drome.comb(allofthem, n))
+    allofthem.map((f: Int) => drome.comb(allofthem, f)) foreach println
+    // println((f: Int) => drome.comb(allofthem, f))
 
     
   } // end main method
