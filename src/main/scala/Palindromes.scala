@@ -1,3 +1,14 @@
+
+
+
+package scala
+package collection
+
+import immutable.{ List, Range }
+import generic._
+import parallel.ParSeq
+import scala.math.Ordering
+
 import Palindromes._
 import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
@@ -12,10 +23,20 @@ import scala.compat.Platform.currentTime
 import scala.math
 import java.io.File
 import java.io.PrintWriter
+import java.io._
 
 
 import scala.io.Source
 import scala.collection.parallel.mutable.ParArray
+import java.io.SequenceInputStream
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+
+
+
+
 
 /*
  * CS3210 - Principles of Programming Languages - Fall 2020
@@ -32,136 +53,189 @@ import scala.collection.parallel.mutable.ParArray
 
 
 
+
+class Palindromes (private var n: Int, private var m: Int) {
+
+
+
+  val x = ( 1 to n).to[ArrayBuffer]
+
+  // val xr = List.fill(n)(x).flatten.to[ArrayBuffer]
+  // println(xr)
+
+
+//   def getCombos(xr: Seq[Int], upTo: Int) = {
+//     for(b <- 1 to upTo){
+      
+
+//          println(xr.combinations(b).to[ArrayBuffer])
+
+//     }
+//   }
+// getCombos(xr, n)
+  val zz = x.permutations
   
-class Palindromes (private var n: Int, m: Int) {
+  val uu = for (ind <- 1 to n) {x.combinations(ind).to[ArrayBuffer]}
 
-
-    // returns a list of lists of all the combinations of size n within sequence p
-  def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p }).to[ParArray]
-
-
-//   def validSequenceFilter(combinations: ParArray[ParArray[Int]])
-
-  // def runsAll(whole_range: ArrayBuffer[Int], n: Int) = whole_range.map((f: Int) => comb(whole_range, f))
-
-  // def powerset[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) { case (ss, el) => ss ++ ss.map(_ + el) }
-
-  // def combine(in: List[Char]): Seq[String] = 
-  //   for {
-  //       len <- 1 to in.length
-  //       combinations <- in combinations len
-  //   } yield combinations.mkString 
-
-
-  def sub(a: Int, b: Int) = a - b 
-
-  def double(el: Int) = el * 2
-
-    //  returns list of n's divisors
-  def divSeq(n: Int): ArrayBuffer[Int]  = (1 to n + 1).filter(n % _ == 0).to[ArrayBuffer]
-
-  def removeFirstAndLast[A](xs: Iterable[A]) = xs.drop(1).dropRight(1)
-
-
-  //   // called with divsiros returns an array of tuples (divisor,multiple) = n
-  // def divMult(n: Int) = divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
-
-
-  // def divVary(n: Int) = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) =>  (f, sub(n, f)) )
-
-
-      // called with divsiros returns an array of tuples (divisor,multiple) = n
-  def divMult(n: Int): ArrayBuffer[(Int, Int)]= divSeq(n).map((f: Int) => { (f, ndiv(n, f)) })
-
-
-  def divVary(n: Int): ArrayBuffer[(Int, Int)] = divSeq(n).filter( _ > 1).filter(double(_) != n ).filter(_ < n).map((f: Int) => { (f, sub(n, f)) })
-
-  
-
-
-
-    // returns a list of lists of all the combinations of size n within sequence p
-  // def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p })
-
-
-    // returns a list of length a containing int b
-  def listDiv(a: Int, b: Int): ArrayBuffer[Int]  =  ArrayBuffer.fill(a)(b)
-
-  // def listDov(n: Int, substitute: Int): ArrayBuffer[Int]  = {
-  //        ArrayBuffer.fill()(substitute)
-  
-
-  // }
-  
-  
-
-
-
-  //   // returns a list of length a containing int b
-  // def listVary(a: Int, b: Int) = List.fill(a)(b)
-
-  // def add[(_: Int, _: Int)] = a + b
+  print(uu)
 
 
 
 
 
-  def divFactComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {divMult(n).map{case (param1, param2) => listDiv(param1,param2)}}
+  def find_combinations_sum_n (i: Int, n: Int, reults: ArrayBuffer[Int], index: Int) {
 
-  def divVaryComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {(divVary(n).map{case (param1, param2)  => listDiv( param1, 1 ) :+ (param2)})}
+		if (n == 0) {
 
-  // removeFirstAndLast
-  
+      permute_and_palendrome(results.to[ArrayBuffer].take(index))
+		}
+    
+    // start from previous element in the combination till n
+    var x: Int = i 
+		for (x <- i to  n  )
+		{ 
+
+      
+			// place current element at current index
+			results(index) = x
+      
+			// recur with reduced sum
+			find_combinations_sum_n(x, n - x, results, index + 1);
+		}
+  }
 
 
-  // def divVaryComb[N](N: Seq[(Int, Int)], n: Int, z: Int) = divVary(n).map{case (param1, param2) => (listDiv(param1,z) :+ (param2))}
 
-
-  // def divVaryComb[N](N: Seq[(Int, Int)], n: Int) = divVary(n).map{case (param1, param2) => while ( i=0,i++; i  until ndiv(d, n - param1)) listDiv(param1,1) :+ (param2)}
-
-    // returns the number of times a number a can be multiplied and remain less than n
-  def ndiv(n: Int, a: Int) = {
-    var times = 0
-    var temp = a
-    while (temp <= n) {
-      times += 1
-      temp += a
+  def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
+    for(x <- toPermute.permutations.to[ArrayBuffer]) {
+      if (isPalindrome(x)){
+        println(x.to[ArrayBuffer])
+        pw.write(x.toString() + "\n")
+      
+      }
     }
-    times
+  }
+        
+
+def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
+    val len = permutedSums.length
+    for(i <- 0 until len/2) {
+      if(permutedSums(i) != permutedSums(len-i-1)){
+        return false
+      }
+    }
+    true 
   }
 
-  def combo(n: Int, divisors: ArrayBuffer[Int] ): ArrayBuffer[Int]  = {
-	  val combos =  ArrayBuffer.fill(n + 1)(0)
-	  combos(0) = 1
-	  divisors.foreach (current =>
-	  for (i<-current to n)
-		  combos(i) =  combos(i) + combos(i - current)
-		  )
-	combos
-  }   
+    var results = ArrayBuffer.fill(n)(0)
+    val pw = new PrintWriter(new File("tmp.txt" ))
+
+    pw.write(find_combinations_sum_n(1,n,results, 0).toString())
+
+    pw.close
 
 
-  // def write(args: Array[String]) {
-  //   val writer = new PrintWriter(new File(OUTPUT_FILE_NAME))
+  find_combinations_sum_n(1,n,results, 0)
 
-  //   writer.write("Hello Developer, Welcome to Scala Programming.")
-  //   writer.close()
 
-  //   Source.fromFile("Write.txt").foreach { x => print(x) }
+  // x.combinations(4).to[ArrayBuffer]
+
+  // println(x.toSet[Int].subsets.map(_.toList).toList.combinations(4))
+
+
+  // var z = y.combinations(3).foreach(println)
+
+
+  // println(z)
+  // y.permutations foreach println
+
+
+  // for (w <- 0 to n){
+  //   println((x^2).combinations(w))
+  //   println("\n\n\n")
+  //   }
+
+  // def comboLen(n: Int) =  comb(arrayN(n), n).foreach{println}
+
+  // def comboLen(n: Int) = for (len <-1 to n){ comb(arrayN(n), len).foreach{println}}
+
+  // def combs(n: Int) =  for(_ <-1 until arr.length){ comb(arr, _)}
+
+  // def isPalindromeREALLY(seq: ArrayBuffer[Int], func: Int => Boolean) = {
+  //     for (d <- 1 to n-1){
+  //       if(seq(d) == seq(n-d)){
+  //         true
+  //       }
+  //     }
+  //   false
+  // )
+
+
+
+
+    // def isPalindrome(seq: ArrayBuffer[Int] => Boolean) = {( 1 until length(seq)/2) => (_==_)}
+
+  def sumToN(seq: ArrayBuffer[Int], func: Int => Boolean)  = (seq.foldLeft(0)(_ + _) == n)
+
+  // def isPalindrome(seqSeq: ArrayBuffer[ArrayBuffer[Int]]) = (
+  //   while (seqSeq.hasnext) { seq = seqSeq.next
+  //      while (seq.hasnext){(index = seq.next) 
+  //       if (seq(index) != seq(seq.length-index)){
+  //         seq.clear
+  //      }
+
+  //   }
+
   // }
 
 
+    // def comb(p: ArrayBuffer[Int], n:Int)   = p.combinations(n).map{ _ map p }
+  // def comb(p: ArrayBuffer[Int], n:Int)  = p.combinations(n).map{ _ map p }.toArray.par).foreach{println}
 
-  }
+
+
+
+
+
+  // def isPalindrome(seq: ArrayBuffer[Int] => Boolean) = {( 1 until length(seq)/2) => (_==_)}
+  //
+  // def correctSum(seq: ArrayBuffer[Int]): Boolean  = {
+  //   if (seq.foldLeft(0)(_ + _) == n){
+  //     true
+  //   }
+  //   false
+  // }
+
+    // returns a list of lists of all the combinations of size n within sequence p
+  def comb(p: ArrayBuffer[Int], n:Int)  = ((0 until p.size).to[ArrayBuffer].combinations(n).map{ _ map p })
+
+
+// def divFactComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {divMult(n).map{case (param1, param2) => listDiv(param1,param2)}}
+
+// def divVaryComb[N](N: ArrayBuffer[(Int, Int)], n: Int) = {(divVary(n).map{case (param1, param2)  => listDiv( param1, 1 ) :+ (param2)})}
+
+
+def writeFile(filename: String, lines: Seq[String]): Unit = {
+    val file = new File(filename)
+    val bw = new BufferedWriter(new FileWriter(file))
+    for (line <- lines) {
+        bw.write(line)
+    }
+    bw.close()
+}
+                                                            
+
+}
+  
 
 
 object Palindromes {
 
-  val usage = 
+  val usage =
           """
 
             Use: java PalindromesSearch n m [y]
-            [y]: when informed, all palindromic sequences must be saved to a file 
+            [y]: when informed, all palindromic sequences must be saved to a file
 
           """
   val OUTPUT_FILE_NAME = "output.txt"
@@ -172,13 +246,15 @@ object Palindromes {
 
     print("\n\nWelcome to the palindromic sequence project!\n\n")
     if(args.length == 0){
-      println(usage)    
+      println(usage)
       System.exit(1)
     }
     if (args.length == 1){
       println(usage)
       System.exit(1)
     }
+
+    
 
 
     val n =  args(0).toInt
@@ -188,53 +264,14 @@ object Palindromes {
 
     print("Parameter n = " + n + "\nParameter m = " + m + "\n")
 
-    val drome  = new Palindromes(n, m)
-    var divisors: ArrayBuffer[Int]   =   drome.divSeq(n)
+    val dromes  = new Palindromes(n, m)
+ 
 
 
 
-    // var mult = drome.divMult(n)
-
-    // println(drome.primeFactorsMult(336))
-
-    
-
-    // var combi =  drome.sumCombination(divisors)
-    // var divMult = drome.divisorsMult(n)
-
-    // print(drome.divisorsSequence(n).toSeq + "\n")
-
-    // print(div2+ "\n"+ "\n")
-
-    println("\n\ndivisor Seq func")
-    println(drome.divSeq(n))
-
-    println("\n\ndivisor Mult func")
-    println(drome.divMult(n))
-
-    // println("\n\ndivisor Mult func unzip")
-    // println(drome.divMult(n).unzip)
-    println("\n\n Combinations")
-
-    var conbinations = drome.divFactComb(drome.divMult(n), n) :+ drome.divVaryComb(drome.divVary(n),n)
-    conbinations foreach println
 
 
-    // println("\n\ndivFactList func")
-    // drome.divFactComb(drome.divMult(n), n) foreach println
-    // println("end divFactList func end")
-    // print(drome.divFactComb(drome.divMult(n), n))
 
-    // println("\n\ndivisor Vary func")
-    // println(drome.divVaryComb(drome.divVary(n),n))
-
-    // println(drome.powerset(Set(0 to n)))
-    var allofthem: ArrayBuffer[Int] = (0 to n).to[ArrayBuffer]
-    // println(drome.comb(allofthem, n))
-    allofthem.map((f: Int) => drome.comb(allofthem, f)) foreach println
-    // println((f: Int) => drome.comb(allofthem, f))
-
-    
   } // end main method
 
 } // end of object
@@ -247,11 +284,11 @@ object Palindromes {
   //   }
   //   _palindrome(true, l)
   // }
- 
+
 
 
         //   def commaSeparated(list: List[String], func: String=>Unit): Unit = list match {
-        //   case List() => 
+        //   case List() =>
         //   case List(a) => func(a)
         //   case h::t => func(h + ", ")
         //               commaSeparated(t, func)
@@ -263,4 +300,228 @@ object Palindromes {
     // for (d <- 2 to n - 1)
 
 
- // PalindromesSearch object
+
+class overSeq {
+
+trait SeqLike[+A, +Repr] extends Any with IterableLike[A, Repr] with GenSeqLike[A, Repr] with Parallelizable[A, ParSeq[A]] { self =>
+
+  override protected[this] def thisCollection: Seq[A] = this.asInstanceOf[Seq[A]]
+  override protected[this] def toCollection(repr: Repr): Seq[A] = repr.asInstanceOf[Seq[A]]
+
+  def length: Int
+
+  def apply(idx: Int): A
+
+  protected[this] override def parCombiner = ParSeq.newCombiner[A]
+
+  /** Compares the length of this $coll to a test value.
+   *
+   *   @param   len   the test value that gets compared with the length.
+   *   @return  A value `x` where
+   *   {{{
+   *        x <  0       if this.length <  len
+   *        x == 0       if this.length == len
+   *        x >  0       if this.length >  len
+   *   }}}
+   *  The method as implemented here does not call `length` directly; its running time
+   *  is `O(length min len)` instead of `O(length)`. The method should be overwritten
+   *  if computing `length` is cheap.
+   */
+  def lengthCompare(len: Int): Int = {
+    if (len < 0) 1
+    else {
+      var i = 0
+      val it = iterator
+      while (it.hasNext) {
+        if (i == len) return if (it.hasNext) 1 else 0
+        it.next()
+        i += 1
+      }
+      i - len
+    }
+  }
+
+  override /*IterableLike*/ def isEmpty: Boolean = lengthCompare(0) == 0
+
+  /** The size of this $coll, equivalent to `length`.
+   *
+   *  $willNotTerminateInf
+   */
+  override def size = length
+
+  def segmentLength(p: A => Boolean, from: Int): Int = {
+    var i = 0
+    val it = iterator.drop(from)
+    while (it.hasNext && p(it.next()))
+      i += 1
+    i
+  }
+
+  def indexWhere(p: A => Boolean, from: Int): Int = {
+    var i = math.max(from, 0)
+    val it = iterator.drop(from)
+    while (it.hasNext) {
+      if (p(it.next())) return i
+      else i += 1
+    }
+    -1
+  }
+
+  // def lastIndexWhere(p: A => Boolean, end: Int): Int = {
+  //   var i = length - 1
+  //   val it = reverseIterator
+  //   while (it.hasNext && { val elem = it.next(); (i > end || !p(elem)) }) i -= 1
+  //   i
+  // }
+
+  /** Iterates over distinct permutations.
+   *
+   *  @return   An Iterator which traverses the distinct permutations of this $coll.
+   *  @example  `"abb".permutations = Iterator(abb, bab, bba)`
+   */
+  def permutations: Iterator[Repr] =
+    if (isEmpty) Iterator(repr)
+    else new PermutationsItr
+
+  /** Iterates over combinations.  A _combination_ of length `n` is a subsequence of
+   *  the original sequence, with the elements taken in order.  Thus, `"xy"` and `"yy"`
+   *  are both length-2 combinations of `"xyy"`, but `"yx"` is not.  If there is
+   *  more than one way to generate the same subsequence, only one will be returned.
+   *
+   *  For example, `"xyyy"` has three different ways to generate `"xy"` depending on
+   *  whether the first, second, or third `"y"` is selected.  However, since all are
+   *  identical, only one will be chosen.  Which of the three will be taken is an
+   *  implementation detail that is not defined.
+   *
+   *  @return   An Iterator which traverses the possible n-element combinations of this $coll.
+   *  @example  `"abbbc".combinations(2) = Iterator(ab, ac, bb, bc)`
+   */
+  def combinations(n: Int): Iterator[Repr] =
+    if (n < 0 || n > size) Iterator.empty
+    else new CombinationsItr(n)
+
+  private class PermutationsItr extends AbstractIterator[Repr] {
+    private[this] val (elms, idxs) = init()
+    private var _hasNext = true
+
+    def hasNext = _hasNext
+    def next(): Repr = {
+      if (!hasNext)
+        Iterator.empty.next()
+
+      val forcedElms = new mutable.ArrayBuffer[A](elms.size) ++= elms
+      val result = (self.newBuilder ++= forcedElms).result()
+      var i = idxs.length - 2
+      while(i >= 0 && idxs(i) >= idxs(i+1))
+        i -= 1
+
+      if (i < 0)
+        _hasNext = false
+      else {
+        var j = idxs.length - 1
+        while(idxs(j) <= idxs(i)) j -= 1
+          swap(i,j)
+
+        val len = (idxs.length - i) / 2
+        var k = 1
+        while (k <= len) {
+          swap(i+k, idxs.length - k)
+          k += 1
+        }
+      }
+      result
+    }
+    private def swap(i: Int, j: Int) {
+      val tmpI = idxs(i)
+      idxs(i) = idxs(j)
+      idxs(j) = tmpI
+      val tmpE = elms(i)
+      elms(i) = elms(j)
+      elms(j) = tmpE
+    }
+
+    private[this] def init() = {
+      val m = mutable.HashMap[A, Int]()
+      val (es, is) = (thisCollection map (e => (e, m.getOrElseUpdate(e, m.size))) sortBy (_._2)).unzip
+
+      (es.toBuffer, is.toArray)
+    }
+  }
+
+  private class CombinationsItr(n: Int) extends AbstractIterator[Repr] {
+    // generating all nums such that:
+    // (1) nums(0) + .. + nums(length-1) = n
+    // (2) 0 <= nums(i) <= cnts(i), where 0 <= i <= cnts.length-1
+    private val (elms, cnts, nums) = init()
+    private val offs = cnts.scanLeft(0)(_ + _)
+    private var _hasNext = true
+
+    def hasNext = _hasNext
+    def next(): Repr = {
+      if (!hasNext)
+        Iterator.empty.next()
+
+      /* Calculate this result. */
+      val buf = self.newBuilder
+      for(k <- 0 until nums.length; j <- 0 until nums(k))
+        buf += elms(offs(k)+j)
+      val res = buf.result()
+
+      /* Prepare for the next call to next. */
+      var idx = nums.length - 1
+      while (idx >= 0 && nums(idx) == cnts(idx))
+        idx -= 1
+
+      idx = nums.lastIndexWhere(_ > 0, idx - 1)
+
+      if (idx < 0)
+        _hasNext = false
+      else {
+        // OPT: hand rolled version of `sum = nums.view(idx + 1, nums.length).sum + 1`
+        var sum = 1
+        var i = idx + 1
+        while (i < nums.length) {
+          sum += nums(i)
+          i += 1
+        }
+        nums(idx) -= 1
+        for (k <- (idx+1) until nums.length) {
+          nums(k) = sum min cnts(k)
+          sum -= nums(k)
+        }
+      }
+
+      res
+    }
+
+    /** Rearrange seq to newSeq a0a0..a0a1..a1...ak..ak such that
+     *  seq.count(_ == aj) == cnts(j)
+     *
+     *  @return     (newSeq,cnts,nums)
+     */
+    private def init(): (IndexedSeq[A], Array[Int], Array[Int]) = {
+      val m = mutable.HashMap[A, Int]()
+
+      // e => (e, weight(e))
+      val (es, is) = (thisCollection map (e => (e, m.getOrElseUpdate(e, m.size))) sortBy (_._2)).unzip
+      val cs = new Array[Int](m.size)
+      is foreach (i => cs(i) += 1)
+
+      val ns = new Array[Int](cs.length)
+
+      var r = n
+      0 until ns.length foreach { k =>
+        ns(k) = r min cs(k)
+        r -= ns(k)
+      }
+      (es.toIndexedSeq, cs, ns)
+    }
+  }
+
+
+}
+
+
+
+
+ }
