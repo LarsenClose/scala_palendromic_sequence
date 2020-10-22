@@ -1,14 +1,4 @@
 
-
-
-package scala
-package collection
-
-import immutable.{ List, Range }
-import generic._
-import parallel.ParSeq
-import scala.math.Ordering
-
 import Palindromes._
 import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
@@ -25,9 +15,6 @@ import java.io._
 import scala.io.Source
 import scala.collection.parallel.mutable.ParArray
 import java.io.SequenceInputStream
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 
 
@@ -52,62 +39,55 @@ import java.util.stream.Collectors;
 
 class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
 
-    var results = ArrayBuffer.fill(n)(0)
-    val pw = new PrintWriter(new File("tmp.txt" ))
+  def results() = ArrayBuffer.fill(n)(0)
+  val pw = new PrintWriter(new File("tmp.txt" ))
 
-    if (informed){
-      println("Generating palindromic sequences...\n\n\n")
-      pw.write(find_combinations_sum_n(1,n,results, 0).toString())
-      pw.close
-      if(DEBUG){printStatistics()}
-    }
-    else {
-      find_combinations_sum_n(1,n,results, 0)
-      printStatistics()
-    }
-
+  if (informed){
+    println("Generating palindromic sequences...\n\n\n")
+    pw.write(find_combinations_sum_n(1,n,results, 0).toString())
+    pw.close
+    println("\n\nDone!\n\n")
+    if(DEBUG){printStatistics()}
+  }
+  else {
+    find_combinations_sum_n(1,n,results, 0)
+    printStatistics()
+  }
     
-    def printStatistics()  {
-      println("\nTotal number of palindromic sequences found: " + count_palindromes)
-      println("\nNumber of palindromic sequences found which contain " + m +  " is: " + count_matching_m)
-      printf("\nDuration: %.5fs\n", (System.nanoTime() - t) / scala.math.pow(10, 9))
-    }               
+  def printStatistics()  {
+    println("\nNumber of palindromic sequences found which contain " + m +  " is: " + count_matching_m)
+    printf("\nDuration: %.5fs\n", (System.nanoTime() - t) / scala.math.pow(10, 9))
+  }               
 
 
-
-
-  def find_combinations_sum_n (i: Int, n: Int, reults: ArrayBuffer[Int], index: Int) {
+  def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
     // base case result (take) index contains a combinatorial summation equal to n 
-		if (n == 0) { permute_and_palendrome(results.to[ArrayBuffer].take(index))}
+		if (n == 0) { permute_and_palendrome((results.take(index)) )}
     var x: Int = i 
     for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, n - x, results, index + 1)}
   }
 
-
-
   def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
-    for(x <- toPermute.permutations.to[ArrayBuffer]) {
-      if (isPalindrome(x)){
+    for(x <- toPermute.permutations) if (x.contains(m)) {
+      if (isPalindrome(x) && x.contains(m)){
+        // if(DEBUG) {print(x.to[ArrayBuffer])if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
 
-        if(DEBUG) {println(x.to[ArrayBuffer])}
+          count_matching_m += 1
+          if(informed){pw.write(x.toString() + "\n")}
 
-        count_palindromes += 1
-        if(informed){pw.write(x.toString() + "\n")}
-      
+        }
       }
     }
-  }
-        
-
+  
 def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
     val len = permutedSums.length
     for(i <- 0 until len/2) {
-      if(permutedSums(i) != permutedSums(len-i-1)){
-        return false}
+      if(permutedSums(i) != permutedSums(len-i-1)){return false}
     }
     true 
   }            
-}
+
+} // end of Palindromes class
   
 
 object Palindromes {
@@ -143,9 +123,79 @@ object Palindromes {
     val m = args(1).toInt
     if (args.length == 3 && args(2) == "y")
       informed = true
+    else 
+      informed = false
 
     print("Parameter n = " + n + "\nParameter m = " + m + "\n\n\n")
 
-    val dromes  = new Palindromes(n, m, informed)
+    new Palindromes(n, m, informed)
   } // end main method
 } // end of object
+
+
+// /**
+//  * Generic way to create memoized functions (even recursive and multiple-arg ones)
+//  * Author pathikrit stackoverflow
+//  * @param f the function to memoize
+//  * @tparam I input to f
+//  * @tparam K the keys we should use in cache instead of I
+//  * @tparam O output of f
+//  */
+// case class Memo[I <% K, K, O](f: I => O) extends (I => O) {
+//   import collection.mutable.{Map => Dict}
+//   type Input = I
+//   type Key = K
+//   type Output = O
+//   val cache = Dict.empty[K, O]
+//   override def apply(x: I) = cache getOrElseUpdate (x, f(x))
+// }
+
+// object Memo {
+//   /**
+//    * Type of a simple memoized function e.g. when I = K
+//    */
+//   type ==>[I, O] = Memo[I, I, O]
+// }
+
+
+
+
+
+// lazy val fib: Int ==> BigInt = Memo {
+//   case 0 => 0
+//   case 1 => 1
+//   case n if n > 1 => fib(n-1) + fib(n-2)
+// }
+
+
+//   /**
+//    * http://mathworld.wolfram.com/Combination.html
+//    * @return memoized function to calculate C(n,r)
+//    */
+//   val c: (Int, Int) ==> BigInt = Memo {
+//     case (_, 0) => 1
+//     case (n, r) if r > n/2 => c(n, n - r)
+//     case (n, r) => c(n - 1, r - 1) + c(n - 1, r)
+//   }
+
+
+//   /**
+//    * Calculate edit distance between 2 sequences
+//    * O(s1.length * s2.length)
+//    *
+//    * @return Minimum cost to convert s1 into s2 using delete, insert and replace operations
+//    */
+//   def editDistance[A](s1: Seq[A], s2: Seq[A]) = {
+
+//     type DP = Memo[(Seq[A], Seq[A]), (Int, Int), Int]
+//     implicit def encode(key: DP#Input): DP#Key = (key._1.length, key._2.length)
+
+//     lazy val f: DP = Memo {
+//       case (a, Nil) => a.length
+//       case (Nil, b) => b.length
+//       case (a :: as, b :: bs) if a == b => f(as, bs)
+//       case (a, b) => 1 + (f(a, b.tail) min f(a.tail, b) min f(a.tail, b.tail))
+//     }
+
+//     f(s1, s2)
+//   }
