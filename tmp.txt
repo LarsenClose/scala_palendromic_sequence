@@ -1,0 +1,5 @@
+ArrayBuffer(1, 1, 2, 1, 1)
+ArrayBuffer(1, 2, 2, 1)
+ArrayBuffer(2, 1, 1, 2)
+ArrayBuffer(2, 2, 2)
+()

@@ -1,20 +1,7 @@
-
 import Palindromes._
-import scala.collection.mutable._
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.ArrayBuffer._
-
-import scala.compat.Platform.currentTime
-
-import scala.math
 import java.io.File
 import java.io.PrintWriter
-import java.io._
-
-
-import scala.io.Source
-import scala.collection.parallel.mutable.ParArray
-import java.io.SequenceInputStream
 
 
 
@@ -128,71 +115,3 @@ object Palindromes {
     new Palindromes(n, m, informed)
   } // end main method
 } // end of object
-
-
-// /**
-//  * Generic way to create memoized functions (even recursive and multiple-arg ones)
-//  * Author pathikrit stackoverflow
-//  * @param f the function to memoize
-//  * @tparam I input to f
-//  * @tparam K the keys we should use in cache instead of I
-//  * @tparam O output of f
-//  */
-// case class Memo[I <% K, K, O](f: I => O) extends (I => O) {
-//   import collection.mutable.{Map => Dict}
-//   type Input = I
-//   type Key = K
-//   type Output = O
-//   val cache = Dict.empty[K, O]
-//   override def apply(x: I) = cache getOrElseUpdate (x, f(x))
-// }
-
-// object Memo {
-//   /**
-//    * Type of a simple memoized function e.g. when I = K
-//    */
-//   type ==>[I, O] = Memo[I, I, O]
-// }
-
-
-
-
-
-// lazy val fib: Int ==> BigInt = Memo {
-//   case 0 => 0
-//   case 1 => 1
-//   case n if n > 1 => fib(n-1) + fib(n-2)
-// }
-
-
-//   /**
-//    * http://mathworld.wolfram.com/Combination.html
-//    * @return memoized function to calculate C(n,r)
-//    */
-//   val c: (Int, Int) ==> BigInt = Memo {
-//     case (_, 0) => 1
-//     case (n, r) if r > n/2 => c(n, n - r)
-//     case (n, r) => c(n - 1, r - 1) + c(n - 1, r)
-//   }
-
-
-//   /**
-//    * Calculate edit distance between 2 sequences
-//    * O(s1.length * s2.length)
-//    *
-//    * @return Minimum cost to convert s1 into s2 using delete, insert and replace operations
-//    */
-//   def editDistance[A](s1: Seq[A], s2: Seq[A]) = {
-
-//     type DP = Memo[(Seq[A], Seq[A]), (Int, Int), Int]
-//     implicit def encode(key: DP#Input): DP#Key = (key._1.length, key._2.length)
-
-//     lazy val f: DP = Memo {
-//       case (a, Nil) => a.length
-//       case (Nil, b) => b.length
-//       case (a :: as, b :: bs) if a == b => f(as, bs)
-//       case (a, b) => 1 + (f(a, b.tail) min f(a.tail, b) min f(a.tail, b.tail))
-//     }
-
-//     f(s1, s2)
-//   }
