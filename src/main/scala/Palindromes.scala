@@ -36,32 +36,39 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
   else {
     find_combinations_sum_n(1,n,results, 0)
     printStatistics()
+    
+     
   }
 
   def printStatistics()  {
+    if (DEBUG)println("\nTotal number of palindromic sequences found: " + count_palindromes)
     println("\nNumber of palindromic sequences found which contain " + m +  " is: " + count_matching_m)
     printf("\nDuration: %.5fs\n", (System.nanoTime() - t) / scala.math.pow(10, 9))
+    
   }
 
 
   def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
     // base case result (take) index contains a combinatorial summation equal to n
-		if (n == 0) { permute_and_palendrome(results.take(index)) }
+		if (n == 0) { permute_and_palendrome(results.take(index)) } //;print(results.take(index))
     var x: Int = i
     for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, n - x, results, index + 1)}
   }
 
   def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
-    for(x <- toPermute.permutations) if (x.contains(m)) {
-      if (isPalindrome(x) && x.contains(m)){
-        // if(DEBUG) {print(x.to[ArrayBuffer])if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
+    if(DEBUG) for(x <- toPermute.permutations){
+      count_palindromes += 1
+      print(x.to[ArrayBuffer]);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
 
+    if (toPermute.contains(m)){
+      for (el <- toPermute.permutations) if(isPalindrome(el)){
           count_matching_m += 1
-          if(informed){pw.write(x.toString() + "\n")}
-
-        }
+          if(informed) {pw.write(el.toString() + "\n")}
       }
     }
+  }
+  
+
 
 def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
     val len = permutedSums.length
@@ -69,7 +76,7 @@ def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
       if(permutedSums(i) != permutedSums(len-i-1)){return false}
     }
     true
-  }
+}
 
 } // end of Palindromes class
 
@@ -95,11 +102,7 @@ object Palindromes {
   def main(args: Array[String]): Unit = {
 
     print("\n\nWelcome to the palindromic sequence project!\n\n")
-    if(args.length == 0){
-      println(usage)
-      System.exit(1)
-    }
-    if (args.length == 1){
+    if (args.length <= 1){
       println(usage)
       System.exit(1)
     }
