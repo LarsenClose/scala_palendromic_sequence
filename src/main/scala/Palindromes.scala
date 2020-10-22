@@ -25,13 +25,10 @@ import java.io.SequenceInputStream
  * CS3210 - Principles of Programming Languages - Fall 2020
  * Instructor: Thyago Mota
  * Description: Prg02 - PalindromesSearch
- * Student: Larsen Close
+ * Student: Larsen Close and Stuart Griffin
  *
  * TODO
- * 1. Sanitize input
- * 2. Find all divisors
- * 3. Find all combinations of divisors which equal n
- * 4. Eliminate all permutations which are not palindromes (first) or which cannot be palindromes (optimization)
+ * 1. Speed it up
  */
 
 
@@ -53,17 +50,17 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
     find_combinations_sum_n(1,n,results, 0)
     printStatistics()
   }
-    
+
   def printStatistics()  {
     println("\nNumber of palindromic sequences found which contain " + m +  " is: " + count_matching_m)
     printf("\nDuration: %.5fs\n", (System.nanoTime() - t) / scala.math.pow(10, 9))
-  }               
+  }
 
 
   def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
-    // base case result (take) index contains a combinatorial summation equal to n 
-		if (n == 0) { permute_and_palendrome((results.take(index)) )}
-    var x: Int = i 
+    // base case result (take) index contains a combinatorial summation equal to n
+		if (n == 0) { permute_and_palendrome(results.take(index)) }
+    var x: Int = i
     for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, n - x, results, index + 1)}
   }
 
@@ -78,21 +75,21 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
         }
       }
     }
-  
+
 def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
     val len = permutedSums.length
     for(i <- 0 until len/2) {
       if(permutedSums(i) != permutedSums(len-i-1)){return false}
     }
-    true 
-  }            
+    true
+  }
 
 } // end of Palindromes class
-  
+
 
 object Palindromes {
 
-  val DEBUG = true
+  val DEBUG = false
 
   val usage =
           """
@@ -123,7 +120,7 @@ object Palindromes {
     val m = args(1).toInt
     if (args.length == 3 && args(2) == "y")
       informed = true
-    else 
+    else
       informed = false
 
     print("Parameter n = " + n + "\nParameter m = " + m + "\n\n\n")
