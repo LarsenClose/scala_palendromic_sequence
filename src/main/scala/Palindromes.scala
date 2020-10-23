@@ -52,7 +52,7 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
 
   def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
     // base case result (take) index contains a combinatorial summation equal to n
-		if (n == 0) { eliminateImpossible(results.take(index)) } 
+		if (n == 0) { permute_and_palendrome(results.take(index)) } 
     var x: Int = i
     for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, (n - x), results, (index + 1))}
   }
@@ -61,8 +61,6 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
     // if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
     //   count_palindromes += 1
     //   print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
-
-
 
     if (toPermute.contains(m)){
       var hasEvenparity = toPermute.size % 2 == 0
@@ -78,25 +76,18 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
     }
   }
 
-  def eliminateImpossible(victims: ArrayBuffer[Int]){
-     val freqMap = victims.groupBy(identity).mapValues(_.map(_ => 1).reduce(_ + _))
-     var cheese_isFresh = false
-     freqMap.foreach{ 
-       case (k,v) => if (((freqMap.size % 2 == 0) && (v % 2 == 0)) ||  (freqMap.size % 2 == 1) && (v % 2 == 1)){cheese_isFresh = true }
-       case _ => return
-     }
-     permute_and_palendrome(victims)
-  }
 
 
-
-  def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
+def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
       val len = permutedSums.length
-      for(i <- 0 until len/2) {
-        if(permutedSums(i) != permutedSums(len-i-1)){return false}
+      for(i <- 0 until len/2; j <- len/2 to i by -1) {
+        if((permutedSums(i) != permutedSums(len-i-1)) || (permutedSums(len/2 +i) != permutedSums((len/2-1) + j)))  {return false}
+
       }
       true
   }
+
+
 
 } // end of Palindromes class
 
