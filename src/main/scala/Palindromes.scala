@@ -5,11 +5,6 @@ import java.io.File
 import java.io.PrintWriter
 
 
-
-
-
-
-
 /*
  * CS3210 - Principles of Programming Languages - Fall 2020
  * Instructor: Thyago Mota
@@ -19,8 +14,6 @@ import java.io.PrintWriter
  * TODO
  * 1. Speed it up
  */
-
-
 
 
 class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
@@ -38,9 +31,7 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
   else {
     find_combinations_sum_n(1,n,results, 0)
     printStatistics()
-    
-     
-  }
+    }
 
   def printStatistics()  {
     if (DEBUG)println("\nTotal number of palindromic sequences found: " + count_palindromes)
@@ -106,8 +97,8 @@ object Palindromes {
   val OUTPUT_FILE_NAME = "output.txt"
 
   var informed = false
-  var count_palindromes = 0
-  var count_matching_m = 0
+      var count_palindromes: Double = 0
+      var count_matching_m: Double = 0
   var goodmap = true
   val t = System.nanoTime()
 

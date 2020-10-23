@@ -1,4 +1,4 @@
-package pallyParks
+package sparkyThePalindrome
 
 
 import scala.collection.mutable.ArrayBuffer
@@ -14,6 +14,9 @@ import org.apache.spark.sql.SparkSession
 import scala.collection.parallel._
 import scala.collection.parallel.mutable.ParArray
 import scala.collection.parallel.mutable.ParSeq
+
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.rdd.RDD
 
 
 
@@ -31,14 +34,15 @@ import scala.collection.parallel.mutable.ParSeq
 
 
 
-
 object PalindromesSpark {
 
-  val spark = SparkSession.builder().appName("pallyParks").enableHiveSupport().getOrCreate()
+  // val spark = SparkSession.builder().appName("sparkyThePalindrome").enableHiveSupport().getOrCreate()
 
-  val sc = spark.sparkContext
+  // val sc = spark.sparkContext
 
   def main(args: Array[String]): Unit = {
+
+
       val DEBUG = false
       val usage =
               """
@@ -50,8 +54,8 @@ object PalindromesSpark {
       val OUTPUT_FILE_NAME = "output.txt"
 
       var informed = false
-      var count_palindromes = 0
-      var count_matching_m = 0
+      var count_palindromes: Double = 0
+      var count_matching_m: Double = 0
       val t = System.nanoTime()
 
 
@@ -62,8 +66,8 @@ object PalindromesSpark {
         }
 
 
-        val n =  args(0).toByte
-        val m = args(1).toByte
+        val n =  args(0).toInt
+        val m = args(1).toInt
         if (args.length == 3 && args(2) == "y")
           informed = true
         else
@@ -71,15 +75,14 @@ object PalindromesSpark {
 
         print(f"Parameter n = $n%f \nParameter m = $m%f + \n\n\n")
 
+
   
-      val data = Array.fill(n)(0.toByte).par
-
-      val combine = find_combinations_sum_n(1 , n , data, 0)
-
-      val combineData =  sc.parallelize(combine)
+      val sc = new SparkContext(new SparkConf().setMaster("local[*]").setAppName("sparkyThePalindrome"))
+      val data = sc.parallelize(Array.fill(n)(0))   
+      val rdd = sc.parallelize(find_combinations_sum_n(1,n,data, 0))
 
 
-
+     
 
 
       val pw = new PrintWriter(new File("tmp.txt" ))
@@ -87,13 +90,13 @@ object PalindromesSpark {
 
       if (informed){
         println("Generating palindromic sequences...\n\n\n")
-        pw.write(find_combinations_sum_n(1,n,data, 0).toString())
+        pw.write(rdd)
         pw.close
         println("\n\nDone!\n\n")
         if(DEBUG){printStatistics()}
       }
       else {
-        find_combinations_sum_n(1,n,data, 0)
+        print(rdd)
         printStatistics()
       }
 
@@ -106,55 +109,49 @@ object PalindromesSpark {
       }
 
 
-      def find_combinations_sum_n (i: Byte, n: Byte, distData: ParArray[Byte], index: Byte) {
-        // base case result (take) index contains a combinatorial summation equal to n
-        if (n == 0) {(distData.take(index).to[ParArray])} //;print(distData.take(index))
-        var x: Byte = i
-        for (x <- i to  n){distData(index) = x.toByte ; find_combinations_sum_n(x.toByte, (n - x).toByte, distData, (index.toByte + 1.toByte).toByte)}
-      }
+    def find_combinations_sum_n (i: Int, n: Int, distData: RDD[Int], index: Int) {
+      // base case result (take) index contains a combinatorial summation equal to n
+      if (n == 0) { permute_and_palendrome(distData.slice(index)) } //;print(distData.take(index))
+      var x = i
 
-
-      def find_combinations_sum_n (i: Byte, n: Byte, distData: ParArray[Byte], index: Byte) {
-        // base case result (take) index contains a combinatorial summation equal to n
-        if (n == 0) { permute_and_palendrome(distData.take(index).to[ParArray]) } //;print(distData.take(index))
-        var x: Byte = i
-        for (x <- i to  n){distData(index) = x.toByte ; find_combinations_sum_n(x.toByte, (n - x).toByte, distData, (index.toByte + 1.toByte).toByte)}
-      }
-
-      def permute_and_palendrome(toPermute: ParArray[Byte]) {
-        // if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
-        //   count_palindromes += 1
-        //   print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
-
-        if (toPermute.exists(_ == m)){
-          for (el <- toPermute.seq.permutations) if(isPalindrome(el)){
-              count_matching_m += 1
-              if(informed) {pw.write(el.toString() + "\n")}
-          }
-        }
-      }
-      
-      // def permuteParallel(xs:ParSeq[Byte]):ParSeq[ParSeq[Byte]] = xs match {
-      // case isEmpty => ParSeq(ParSeq())
-      // case _  => {
-      //   val len = xs.length
-      //   val lTr = (0 to len-1).map(xs.splitAt(_)).toSeq.filter(lT => !lT._1.exists(_ == lT._2.head)) 
-      //   lTr.map(lT => permuteParallel(lT._1++lT._2.tail).map(lT._2.head ++ _)).flatten
-      //   }
-      // } 
-
-
-
-
-    def isPalindrome(permutedSums: ArraySeq[Byte]): Boolean = {
-        val len = permutedSums.length
-        for(i<- 0 until len/2) {
-          if(permutedSums(i) != permutedSums(len-i-1)){return false}
-        }
-        true
+      data.collect().foreach(x => ({
+        results(index) = x  
+        find_combinations_sum_n(x, (n - x), results, (index + 1))})
     }
 
+  def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
+    // if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
+    //   count_palindromes += 1
+    //   print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
+
+    if (toPermute.contains(m)){
+      // var hasEvenparity = toPermute.size % 2 == 0
+      // var frequency = toPermute.groupMapReduce(identity)(_ => 1)(_ + _) 
+      // var parityElem = frequency(2) % 2 == 0
+      // if ( parityElem && hasEvenparity || !parityElem && !hasEvenparity){
+      
+        for (el <- toPermute.permutations) if(isPalindrome(el)){
+            count_matching_m += 1
+            if(informed) {pw.write(el.toString() + "\n")}
+        }
+      }
+    }
+  
+
+
+
+def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
+      val len = permutedSums.length
+      for(i <- 0 until len/2; j <- len/2 to i by -1) {
+        if((permutedSums(i) != permutedSums(len-i-1)) || (permutedSums(len/2 +i) != permutedSums((len/2-1) + j)))  {return false}
+
+      }
+      true
+  }
+
+
     } // end of Palindromes class
+  
   
 
 } // end of object
