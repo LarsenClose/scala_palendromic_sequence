@@ -21,9 +21,9 @@ import java.io.PrintWriter
 
 
 
-class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
+class Palindromes (private var n: Byte, private var m: Byte, informed: Boolean) {
 
-  def results() = ArrayBuffer.fill(n)(0)
+  def results() = ArrayBuffer.fill(n)(0.toByte)
   val pw = new PrintWriter(new File("tmp.txt" ))
 
   if (informed){
@@ -48,17 +48,17 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
   }
 
 
-  def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
+  def find_combinations_sum_n (i: Byte, n: Byte, results: ArrayBuffer[Byte], index: Byte) {
     // base case result (take) index contains a combinatorial summation equal to n
 		if (n == 0) { permute_and_palendrome(results.take(index)) } //;print(results.take(index))
-    var x: Int = i
-    for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, n - x, results, index + 1)}
+    var x: Byte = i
+    for (x <- i to  n){results(index) = x.toByte ; find_combinations_sum_n(x.toByte, (n - x).toByte, results, (index.toByte + 1.toByte).toByte)}
   }
 
-  def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
-    if(DEBUG) for(x <- toPermute.permutations){
+  def permute_and_palendrome(toPermute: ArrayBuffer[Byte]) {
+    if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
       count_palindromes += 1
-      print(x.to[ArrayBuffer]);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
+      print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
 
     if (toPermute.contains(m)){
       for (el <- toPermute.permutations) if(isPalindrome(el)){
@@ -70,7 +70,7 @@ class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
   
 
 
-def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
+def isPalindrome(permutedSums: ArrayBuffer[Byte]): Boolean = {
     val len = permutedSums.length
     for(i <- 0 until len/2) {
       if(permutedSums(i) != permutedSums(len-i-1)){return false}
@@ -83,7 +83,7 @@ def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
 
 object Palindromes {
 
-  val DEBUG = false
+  val DEBUG = true
 
   val usage =
           """
@@ -106,8 +106,8 @@ object Palindromes {
       println(usage)
       System.exit(1)
     }
-    val n =  args(0).toInt
-    val m = args(1).toInt
+    val n =  args(0).toByte
+    val m = args(1).toByte
     if (args.length == 3 && args(2) == "y")
       informed = true
     else
