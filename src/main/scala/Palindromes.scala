@@ -1,7 +1,9 @@
 import Palindromes._
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
 import java.io.File
 import java.io.PrintWriter
+
 
 
 
@@ -21,9 +23,9 @@ import java.io.PrintWriter
 
 
 
-class Palindromes (private var n: Byte, private var m: Byte, informed: Boolean) {
+class Palindromes (private var n: Int, private var m: Int, informed: Boolean) {
 
-  def results() = ArrayBuffer.fill(n)(0.toByte)
+  def results() = ArrayBuffer.fill(n)(0)
   val pw = new PrintWriter(new File("tmp.txt" ))
 
   if (informed){
@@ -48,35 +50,53 @@ class Palindromes (private var n: Byte, private var m: Byte, informed: Boolean) 
   }
 
 
-  def find_combinations_sum_n (i: Byte, n: Byte, results: ArrayBuffer[Byte], index: Byte) {
+  def find_combinations_sum_n (i: Int, n: Int, results: ArrayBuffer[Int], index: Int) {
     // base case result (take) index contains a combinatorial summation equal to n
-		if (n == 0) { permute_and_palendrome(results.take(index)) } //;print(results.take(index))
-    var x: Byte = i
-    for (x <- i to  n){results(index) = x.toByte ; find_combinations_sum_n(x.toByte, (n - x).toByte, results, (index.toByte + 1.toByte).toByte)}
+		if (n == 0) { eliminateImpossible(results.take(index)) } 
+    var x: Int = i
+    for (x <- i to  n){results(index) = x ; find_combinations_sum_n(x, (n - x), results, (index + 1))}
   }
 
-  def permute_and_palendrome(toPermute: ArrayBuffer[Byte]) {
-    if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
-      count_palindromes += 1
-      print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
+  def permute_and_palendrome(toPermute: ArrayBuffer[Int]) {
+    // if(DEBUG) for(x <- toPermute.permutations) if(isPalindrome(x)){
+    //   count_palindromes += 1
+    //   print(x.toSeq);if(x.contains(m)) {print(" <- contains " + m + "\n")}else println }
+
+
 
     if (toPermute.contains(m)){
-      for (el <- toPermute.permutations) if(isPalindrome(el)){
-          count_matching_m += 1
-          if(informed) {pw.write(el.toString() + "\n")}
+      var hasEvenparity = toPermute.size % 2 == 0
+      var frequency = toPermute.groupMapReduce(identity)(_ => 1)(_ + _) 
+      var parityElem = frequency(2) % 2 == 0
+      if ( parityElem && hasEvenparity || !parityElem && !hasEvenparity){
+      
+        for (el <- toPermute.permutations) if(isPalindrome(el)){
+            count_matching_m += 1
+            if(informed) {pw.write(el.toString() + "\n")}
+        }
       }
     }
   }
-  
+
+  def eliminateImpossible(victims: ArrayBuffer[Int]){
+     val freqMap = victims.groupBy(identity).mapValues(_.map(_ => 1).reduce(_ + _))
+     var cheese_isFresh = false
+     freqMap.foreach{ 
+       case (k,v) => if (((freqMap.size % 2 == 0) && (v % 2 == 0)) ||  (freqMap.size % 2 == 1) && (v % 2 == 1)){cheese_isFresh = true }
+       case _ => return
+     }
+     permute_and_palendrome(victims)
+  }
 
 
-def isPalindrome(permutedSums: ArrayBuffer[Byte]): Boolean = {
-    val len = permutedSums.length
-    for(i <- 0 until len/2) {
-      if(permutedSums(i) != permutedSums(len-i-1)){return false}
-    }
-    true
-}
+
+  def isPalindrome(permutedSums: ArrayBuffer[Int]): Boolean = {
+      val len = permutedSums.length
+      for(i <- 0 until len/2) {
+        if(permutedSums(i) != permutedSums(len-i-1)){return false}
+      }
+      true
+  }
 
 } // end of Palindromes class
 
@@ -97,6 +117,7 @@ object Palindromes {
   var informed = false
   var count_palindromes = 0
   var count_matching_m = 0
+  var goodmap = true
   val t = System.nanoTime()
 
   def main(args: Array[String]): Unit = {
@@ -106,8 +127,8 @@ object Palindromes {
       println(usage)
       System.exit(1)
     }
-    val n =  args(0).toByte
-    val m = args(1).toByte
+    val n =  args(0).toInt
+    val m = args(1).toInt
     if (args.length == 3 && args(2) == "y")
       informed = true
     else
