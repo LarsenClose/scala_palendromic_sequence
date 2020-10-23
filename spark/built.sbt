@@ -1,4 +1,4 @@
-name := "scala_palindromic_sequence"
+name := "PalindromesSearchSpark"
 
 version := "1.0"
 
@@ -13,7 +13,3 @@ libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-sql" % sparkVersion
 
 )
-
-
-
-
